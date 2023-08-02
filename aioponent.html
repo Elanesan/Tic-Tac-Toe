@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tic Tac Toe</title>
+  <link rel="stylesheet" href="ai.css">
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+  <div>
+    <button id="restartButton">Restart Game</button>
+  </div>
+  <br><br>
+  <div class="board">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    
+  </div>
+  
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const board = document.querySelector('.board');
+      const cells = Array.from(board.children);
+      const player = 'X';
+      const ai = 'O';
+      const restartButton = document.getElementById('restartButton');
+
+      cells.forEach(cell => {
+        cell.addEventListener('click', makeMove);
+      });
+
+      restartButton.addEventListener('click', restartGame);
+
+      function makeMove(event) {
+        const cell = event.target;
+        if (cell.textContent === '') {
+          cell.textContent = player;
+          if (checkWin(player)) {
+            endGame('You win! 😣');
+            return;
+          }
+          if (checkTie()) {
+            endGame("It's a tie!");
+            return;
+          }
+          cell.removeEventListener('click', makeMove);
+          cell.style.cursor = 'not-allowed';
+          makeAIMove();
+        }
+      }
+
+      function makeAIMove() {
+        const emptyCells = cells.filter(cell => cell.textContent === '');
+        const randomIndex = Math.floor(Math.random() * emptyCells.length);
+        const randomCell = emptyCells[randomIndex];
+        randomCell.textContent = ai;
+        if (checkWin(ai)) {
+          endGame('I am AI Win!!!😝');
+          return;
+        }
+        if (checkTie()) {
+          endGame("It's a tie!");
+          return;
+        }
+        randomCell.removeEventListener('click', makeMove);
+        randomCell.style.cursor = 'not-allowed';
+      }
+
+      function checkWin(symbol) {
+        const winningCombos = [
+          [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+          [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+          [0, 4, 8], [2, 4, 6] // Diagonals
+        ];
+
+        return winningCombos.some(combo => {
+          return combo.every(index => cells[index].textContent === symbol);
+        });
+      }
+
+      function checkTie() {
+        return cells.every(cell => cell.textContent !== '');
+      }
+
+      function endGame(message) {
+        cells.forEach(cell => {
+          cell.removeEventListener('click', makeMove);
+          cell.style.cursor = 'not-allowed';
+        });
+        alert(message);
+      }
+
+      function restartGame() {
+        cells.forEach(cell => {
+          cell.textContent = '';
+          cell.addEventListener('click', makeMove);
+          cell.style.cursor = 'pointer';
+        });
+        restartButton.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

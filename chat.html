@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Chatbox</title>
+  <style>
+    /* Styles for the chatbox */
+    .chatbox {
+      width: 400px;
+      margin: 0 auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+
+    .chatbox p {
+      margin: 5px 0;
+    }
+
+    .user-message {
+      color: blue;
+    }
+
+    .bot-message {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="chatbox">
+    <p>Welcome to the AI Chatbox!</p>
+    <p>Type your question:</p>
+    <input type="text" id="user-input" placeholder="Enter your question" />
+    <button onclick="sendQuestion()">Send</button>
+    <div id="chat-log"></div>
+  </div>
+
+  <script src="xlsx.full.min.js"></script>
+  <script>
+    // Function to send user's question and get the answer
+    function sendQuestion() {
+      var userQuestion = document.getElementById("user-input").value;
+      var answer = getAnswer(userQuestion);
+      displayMessage(userQuestion, "user-message");
+      displayMessage(answer, "bot-message");
+      document.getElementById("user-input").value = "";
+    }
+
+    // Function to get the answer from the Excel sheet
+    function getAnswer(question) {
+      var fileInput = document.createElement("input");
+      fileInput.setAttribute("type", "file");
+      
+
+
+      fileInput.addEventListener("change", function (event) {
+        var file = event.target.files[0];
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var data = new Uint8Array(e.target.result);
+          var workbook = XLSX.read(data, { type: "array" });
+          var worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          var excelData = XLSX.utils.sheet_to_json(worksheet);
+
+          var answer = "I'm sorry, I don't have an answer to that question.";
+
+          for (var i = 0; i < excelData.length; i++) {
+            var excelQuestion = excelData[i]["Column 1"];
+            if (excelQuestion === question) {
+              answer = excelData[i]["Column 2"];
+              break;
+            }
+          }
+
+          displayMessage(answer, "bot-message");
+        };
+
+        reader.readAsArrayBuffer('chat.xlsx');
+      });
+
+      fileInput.click();
+    }
+
+    // Function to display the message in the chat log
+    function displayMessage(message, className) {
+      var chatLog = document.getElementById("chat-log");
+      var messageElement = document.createElement("p");
+      messageElement.className = className;
+      messageElement.innerHTML = message;
+      chatLog.appendChild(messageElement);
+    }
+  </script>
+</body>
+</html>
